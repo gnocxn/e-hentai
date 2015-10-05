@@ -82,7 +82,11 @@ if (Meteor.isServer) {
                         DONE(err,data);
                     })
                 });
-                return rs.result;
+                if(rs && rs.result){
+                    var testRg = rs.result.match('Length:(.*)pages');
+                    if(testRg) return testRg[1];
+                }
+                return ''
             } catch (ex) {
                 console.log(ex);
             }
