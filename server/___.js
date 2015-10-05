@@ -191,6 +191,27 @@ if (Meteor.isServer) {
                 console.log(ex);
             }
             return result;
+        },
+        fetch_hitomi_by_tags : function(){
+            try{
+                var baseUrl = 'https://hitomi.la/';
+                var rs = Async.runSync(function(DONE){
+
+                })
+            }catch(ex){
+                console.log(ex);
+            }
+        },
+        fetch_hitomi_by_language : function(urlLanguage){
+            try{
+                var rs = Async.runSync(function(DONE){
+
+                });
+
+                return rs.result;
+            }catch(ex){
+                console.log(ex);
+            }
         }
     })
 }
