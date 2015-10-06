@@ -48,6 +48,7 @@ logging@1.0.8
 manuel:isdev@1.0.0
 manuel:reactivearray@1.0.5
 manuel:viewmodel@1.9.13
+me:universe-ebook-converter@1.0.3
 meteor@1.1.9
 meteor-base@1.0.1
 meteorhacks:async@1.0.0
@@ -90,6 +91,7 @@ ui@1.0.8
 underscore@1.0.4
 underscorestring:underscore.string@3.2.2
 url@1.0.5
+vazco:universe-utilities@1.1.6
 vsivsi:job-collection@1.2.3
 webapp@1.2.2
 webapp-hashing@1.0.5
