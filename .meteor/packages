@@ -36,3 +36,4 @@ npm-container
 twbs:bootstrap
 peerlibrary:async
 meteorhacks:async
+underscorestring:underscore.string

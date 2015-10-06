@@ -1,9 +1,20 @@
 if (Meteor.isServer) {
-
+    myJobs.allow({
+        // Grant full permission to any authenticated user
+        admin: function (userId, method, params) {
+            return (userId ? true : false);
+        }
+    });
     Meteor.startup(function () {
         Stories._ensureIndex({href: 1});
         Chapters._ensureIndex({href: 1});
+
+        return myJobs.startJobServer();
     })
+
+    Meteor.publish('allJobs', function () {
+        return myJobs.find({});
+    });
 
     Meteor.methods({
         fetch_list_galleries: function (pages) {
@@ -75,16 +86,16 @@ if (Meteor.isServer) {
                 storyUrl += '?nw=always';
                 var Xray = Meteor.npmRequire('x-ray'),
                     x = Xray();
-                var rs = Async.runSync(function(DONE){
+                var rs = Async.runSync(function (DONE) {
                     x(storyUrl, '#gdd')
-                    (function(err,data){
-                        if(err) console.log(err);
-                        DONE(err,data);
+                    (function (err, data) {
+                        if (err) console.log(err);
+                        DONE(err, data);
                     })
                 });
-                if(rs && rs.result){
+                if (rs && rs.result) {
                     var testRg = rs.result.match('Length:(.*)pages');
-                    if(testRg) return testRg[1];
+                    if (testRg) return testRg[1];
                 }
                 return ''
             } catch (ex) {
@@ -192,22 +203,74 @@ if (Meteor.isServer) {
             }
             return result;
         },
-        fetch_hitomi_by_tags : function(){
-            try{
+        fetch_hitomi_by_tags: function () {
+            try {
                 var baseUrl = 'https://hitomi.la/';
-                var rs = Async.runSync(function(DONE){
+                var rs = Async.runSync(function (DONE) {
 
                 })
-            }catch(ex){
+            } catch (ex) {
                 console.log(ex);
             }
         },
-        fetch_hitomi_by_language : function(urlLanguage){
+        fetch_hitomi_by_language: function (urlLanguage) {
+            try {
+                var urlLanguage = urlLanguage || 'http://hitomi.la/index-english-1.html';
+                var Xray = Meteor.npmRequire('x-ray'),
+                    x = Xray();
+                var rs = Async.runSync(function (DONE) {
+                    x(urlLanguage, {
+                        stories: x('.gallery-content > div', [
+                            {
+                                title: 'h1 a@text',
+                                href: 'h1 a@href',
+                                artists: x('.artist-list ul li', ['a@text']),
+                                type: 'table.dj-desc tr:nth-child(2) td:nth-child(2) a@text',
+                                tags: x('.relatedtags ul li', ['a@text'])
+                            }
+                        ])
+                    })
+                    (function (err, data) {
+                        DONE(err, data);
+                    })
+                });
+                if (rs.result && rs.result.stories) {
+                    var stories = _.map(rs.result.stories, function (story) {
+                        var tags = _.map(story.tags, function (t) {
+                                return t.replaceArray(['♀', '♂'], ['', '']).trim()
+                            }),
+                            title = s.capitalize(story.title, true),
+                            testRex = story.href.match('galleries/(.*).html'),
+                            storyId = (testRex) ? testRex[1] : '';
+                        return _.extend(story, {storyId: storyId, title: title, tags: _.uniq(tags)});
+                    });
+                    return stories;
+                }
+                return rs.result;
+            } catch (ex) {
+                console.log(ex);
+            }
+        },
+        fetch_hitomi_story_chapters : function(url){
             try{
                 var rs = Async.runSync(function(DONE){
-
+                    var Xray = Meteor.npmRequire('x-ray'),
+                        x = Xray();
+                    x(url,'body',['div.img-url'])
+                    (function(err, data){
+                        DONE(err, data);
+                    })
                 });
-
+                if(rs && rs.result){
+                    var chapters = _.map(rs.result, function(c){
+                        var test = c.match('galleries/(.*)/(.*).jpg');
+                        return {
+                            img : 'http:'+c,
+                            chapter : (test) ? test[2] : ''
+                        }
+                    });
+                    return chapters;
+                }
                 return rs.result;
             }catch(ex){
                 console.log(ex);
