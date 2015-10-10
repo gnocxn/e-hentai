@@ -6,8 +6,9 @@ if (Meteor.isServer) {
         }
     });
     Meteor.startup(function () {
-        Stories._ensureIndex({href: 1});
-        Chapters._ensureIndex({href: 1});
+        Stories._ensureIndex({href: 1, storyId: 1});
+        Chapters._ensureIndex({"chapters.no": 1, storyId: 1});
+        Tags._ensureIndex({name : 1});
 
         return myJobs.startJobServer();
     })
@@ -203,16 +204,7 @@ if (Meteor.isServer) {
             }
             return result;
         },
-        fetch_hitomi_by_tags: function () {
-            try {
-                var baseUrl = 'https://hitomi.la/';
-                var rs = Async.runSync(function (DONE) {
 
-                })
-            } catch (ex) {
-                console.log(ex);
-            }
-        },
         fetch_hitomi_by_language: function (urlLanguage) {
             try {
                 var urlLanguage = urlLanguage || 'http://hitomi.la/index-english-1.html';
@@ -251,28 +243,30 @@ if (Meteor.isServer) {
                 console.log(ex);
             }
         },
-        fetch_hitomi_story_chapters : function(url){
-            try{
-                var rs = Async.runSync(function(DONE){
+        fetch_hitomi_story_chapters: function (storyId) {
+            try {
+                var urlTpl = _.template('http://hitomi.la/reader/<%=storyId%>.html'),
+                    url = urlTpl({storyId: storyId});
+                var rs = Async.runSync(function (DONE) {
                     var Xray = Meteor.npmRequire('x-ray'),
                         x = Xray();
-                    x(url,'body',['div.img-url'])
-                    (function(err, data){
+                    x(url, 'body', ['div.img-url'])
+                    (function (err, data) {
                         DONE(err, data);
                     })
                 });
-                if(rs && rs.result){
-                    var chapters = _.map(rs.result, function(c){
-                        var test = c.match('galleries/(.*)/(.*).jpg');
+                if (rs && rs.result) {
+                    var chapters = _.map(rs.result, function (c) {
+                        var test = c.substr(c.lastIndexOf('/') + 1).match(/\d+/);
                         return {
-                            img : 'http:'+c,
-                            chapter : (test) ? test[2] : ''
+                            img: 'http:' + c,
+                            no: (test) ? test[0] : -1
                         }
                     });
                     return chapters;
                 }
                 return rs.result;
-            }catch(ex){
+            } catch (ex) {
                 console.log(ex);
             }
         }
