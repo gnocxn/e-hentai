@@ -1,17 +1,17 @@
 Template.home.viewmodel({
-
-});
+    currentPage : 1,
+    offset : function(){
+        return (this.currentPage() - 1) * 50;
+    },
+    stories : function(){
+        var skip = this.offset();
+        return Stories.find({},{limit : 50, skip : skip});
+    },
+    autorun : function (c) {
+        this.templateInstance.subscribe('getStories', {}, 50, this.offset());
+    }
+},'stories');
 
 Template.home.events({
-    'click #btnFetch' : function(e,t){
-        e.preventDefault();
-        var urlTpl = _.template('http://hitomi.la/index-english-<%=page%>.html');
-        for(var i = 102; i <= 202; i++){
-            var url = urlTpl({page : i});
-            var second = _.random(60, 300);
-            var newJob = new Job(myJobs, 'fetch_hitomi_by_language', {url : url});
-            newJob.delay(second * 1000).save();
-            console.log(newJob._id, second);
-        }
-    }
+
 })

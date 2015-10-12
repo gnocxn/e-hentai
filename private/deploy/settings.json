@@ -1,5 +1,20 @@
 {
+  "private": {
+    "google": {
+      "web": {
+        "client_id": "583101098585-6k5vddchmung5mmo8rdbbc95ge0f3952.apps.googleusercontent.com",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://accounts.google.com/o/oauth2/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "gJsgFLg2qyJ61oJSDwR6v3QJ",
+        "redirect_uris":["http://localhost:4000/oauth2callback"]
+      },
+      "code" : "4/sMGMLNERZAxAMYLXegWrgAFOUHZXlNuPm8RUMfn5uDU",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive"
+      ]
+    }
+  },
   "public": {
-
   }
 }

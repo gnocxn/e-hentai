@@ -2,7 +2,38 @@
     <div class="row">
         <div class="col-md-12">
             <h1 class="header">Convert PDF, EPUB, MOBI</h1>
-            <button id="btnFetch" class="btn btn-default">Fetch</button>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Chapters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#if stories}}
+                            {{#each stories}}
+                                {{> story}}
+                            {{/each}}
+                        {{else}}
+                            <tr>
+                                <td colspan="3">Loading...</td>
+                            </tr>
+                        {{/if}}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+</template>
+
+<template name="story">
+    <tr>
+        <td>{{storyId}}</td>
+        <td>{{title}}</td>
+        <td>{{type}}</td>
+        <td>{{getTotalChapters}}</td>
+    </tr>
 </template>

@@ -1,5 +1,7 @@
 {
-  "x-ray" : "2.0.2",
-  "website-scraper" : "0.3.0",
-  "tmp" : "0.0.28"
+  "x-ray": "2.0.2",
+  "website-scraper": "0.3.0",
+  "tmp": "0.0.28",
+  "googleapis": "2.1.1",
+  "google-auth-library": "0.9.4"
 }
