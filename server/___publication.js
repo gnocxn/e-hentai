@@ -6,7 +6,11 @@ if(Meteor.isServer){
         return Stories.find(params, {limit : limit, skip : offset});
     });
 
-    Meteor.publish('getChapter', function(storyId){
+    Meteor.publish('getStoryBysId', function(sId){
+        return Stories.find({storyId : sId});
+    })
+
+    Meteor.publish('getChapters', function(storyId){
         return Chapters.find({storyId : storyId});
     })
 }

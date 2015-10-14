@@ -1,0 +1,30 @@
+<template name="story_read">
+{{#if subsReady 'myStory' 'myStoryChapters'}}
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class="control-bar text-center">
+                <button class="btn btn-default"><i class="fa fa-fast-backward"></i></button>
+                <button class="btn btn-default"><i class="fa fa-backward"></i></button>
+                <button class="btn btn-default"><i class="fa fa-forward"></i></button>
+                <button class="btn btn-default"><i class="fa fa-fast-forward"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            {{#each preloadChapters}}
+                <img data-aload="{{img}}" alt="{{no}}" style="display: none" class="img-responsive"/>
+            {{/each}}
+        </div>
+    </div>
+    {{#each chapters}}
+        <div data-image="{{img}}"></div>
+    {{/each}}
+{{else}}
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p class="text-center">Loading...</p>
+        </div>
+    </div>
+{{/if}}
+</template>

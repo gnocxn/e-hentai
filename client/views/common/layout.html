@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Manga convert to Epub, Mobi, Pdf</title>
+
 </head>
 
 <template name="defaultLayout">
@@ -57,4 +58,10 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
+</template>
+
+<template name="iframeLayout">
+    <div class="container-fluild">
+        {{> Template.dynamic template=main}}
+    </div>
 </template>

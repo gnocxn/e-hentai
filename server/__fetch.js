@@ -251,6 +251,10 @@ if(Meteor.isServer){
             } catch (ex) {
                 console.log(ex);
             }
+        },
+        imageToBase64 : function(imageUrl){
+            var result = request.getSync(imageUrl, {encoding: null});
+            return 'data:image/png;base64,' + new Buffer(result.body).toString('base64');
         }
     })
 }
