@@ -1,5 +1,13 @@
 {
   "private": {
+    "Tumblr" : {
+      "consumer_key" : "QsgPz174yr8gQxiFL49p6XWqn3UEZWUMZa1LCxlHSUeMIdVnGP",
+      "consumer_secret" : "FbOeTTzDP03c4KuJLZTn0sG2vtQ67zLHrQjhFXMnX52oAQCXTF",
+      "token" : "IsblUygjTOIG1qSUm79hygpQUcEZyArpoURqfBCvrUymMGehsq",
+      "token_secret" : "oBaInVKvGzfsOlwkkDGrazzvAE72fFSof5NUpDnjfUzZd0Sf6L",
+      "blog" : "hentai-english.tumblr.com",
+      "keywords" : ["hentai english","ecchi yuri tumblr", "free ecchi","ecchi ecchi", "hentai ecchi", "ecchi free", "hentai tumblr"]
+    },
     "google": {
       "web": {
         "client_id": "583101098585-6k5vddchmung5mmo8rdbbc95ge0f3952.apps.googleusercontent.com",

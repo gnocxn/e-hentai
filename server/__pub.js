@@ -31,10 +31,10 @@ if (Meteor.isServer) {
                     urls: [{url: storyUrl, filename: 'index.html'}],
                     directory: tmpdir
                 }
-                var rs = Async.runSync(function(done){
+                var rs = Async.runSync(function (done) {
                     scraper.scrape(options)
                         .then(function (result) {
-                            if(result.Error){
+                            if (result.Error) {
                                 done(error, null);
                             }
                             done(null, result[0].filename);
@@ -42,25 +42,225 @@ if (Meteor.isServer) {
                         })
                 });
 
-                if(rs.error){
+                if (rs.error) {
                     throw new Meteor.Error(rs.error);
                 }
-                if(rs.result){
+                if (rs.result) {
                     return {
-                        directory : tmpdir,
-                        filename : tmpdir+rs.result
+                        directory: tmpdir,
+                        filename: tmpdir + rs.result
                     };
                 }
             } catch (ex) {
                 console.log(ex);
             }
         },
-        convertToPdf : function(fileObj){
-            try{
+        sortAndGetChaptersImages: function (storyDir) {
+            try {
+                var fs = Npm.require('fs'),
+                    path = Npm.require('path');
+                var chaptersDir = path.join(storyDir, 'images');
+                var indexHtml = path.join(storyDir, 'index.html');
+                var contentHtml = fs.readFileSync(indexHtml, {encoding: 'utf8'});
+                var rs = Async.runSync(function (done) {
+                    var Xray = Meteor.npmRequire('x-ray'),
+                        x = Xray();
+                    x(contentHtml, ['img@src'])
+                    (function (err, data) {
+                        if (err) done(err, null);
+                        if (data)done(null, data);
+                    })
+                });
+                if (rs.error) {
+                    console.log(rs.error);
+                }
+                if (rs.result) {
+                    return rs.result.map(function (img) {
+                        return path.join(storyDir, img);
+                    })
+                }
+                return [];
+            } catch (ex) {
+                console.log(ex);
+            }
+        },
+        postStoryToTumblr: function (storyId, images) {
+            try {
+                var story = Stories.findOne({storyId: storyId});
+                if (Meteor.settings && Meteor.settings.private && Meteor.settings.private.Tumblr && story) {
+                    var cfg = Meteor.settings.private.Tumblr;
+                    var request = Meteor.npmRequire('request');
+                    var fs = Npm.require('fs');
+                    var oauth = {
+                        consumer_key: cfg.consumer_key,
+                        consumer_secret: cfg.consumer_secret,
+                        token: cfg.token,
+                        token_secret: cfg.token_secret
+                    }
 
-            }catch(ex){
+                    var blogName = cfg.blog;
+                    var urlTpl = _.template('http://api.tumblr.com/v2/blog/<%=blog%>/post'),
+                        url = urlTpl({blog: blogName});
+                    var keywords = cfg.keywords;
+                    var tags = _.shuffle(_.union(story.tags, story.artists, keywords));
+                    var params = {
+                        state: 'published',
+                        slug: story.storyId,
+                        tags: tags.join(','),
+                        caption: story.title,
+                        type : 'photo'
+                    }
+
+                    var rs = Async.runSync(function (done) {
+                        var r = request.post({
+                            url: url,
+                            headers: {
+                                'User-Agent': 'tumblr.js/0.0.5'
+                            }
+                        }, function (err, response, body) {
+                            try {
+                                body = JSON.parse(body);
+                            } catch (e) {
+                                body = {error: 'Malformed Response: ' + body};
+                            }
+                            requestCallback(function (err, data) {
+                                if (err){
+                                    console.log(err);
+                                    done(err, null)
+                                };
+                                if (data)done(null, data);
+                            })(err, response, body);
+                        })
+
+                        // Sign it with the non-data parameters
+                        r.form(params);
+                        r.oauth(oauth);
+
+                        delete r.headers['content-type'];
+                        delete r.body;
+
+                        var form = r.form();
+                        for (var key in params) {
+                            form.append(key, params[key]);
+                        }
+                        if (images) {
+                            if (Array.isArray(images)) {
+                                for (var i = 0; i < images.length; i++) {
+                                    form.append('data[' + i.toString() + ']', fs.createReadStream(images[i]));
+                                }
+                            } else {
+                                form.append('data', fs.createReadStream(images));
+                            }
+                        }
+
+                        var headers = form.getHeaders();
+                        for (key in headers) {
+                            r.headers[key] = headers[key];
+                        }
+
+                    });
+                    if (rs.error) {
+                        console.log(rs.error);
+                    }
+                    return rs.result;
+                }
+            } catch (ex) {
+                console.log(ex);
+            }
+        },
+        editStoryOnTumblr: function (postId, images) {
+            try {
+                if (Meteor.settings && Meteor.settings.private && Meteor.settings.private.Tumblr && postId) {
+                    var cfg = Meteor.settings.private.Tumblr;
+                    var request = Meteor.npmRequire('request');
+                    var fs = Npm.require('fs');
+                    var oauth = {
+                        consumer_key: cfg.consumer_key,
+                        consumer_secret: cfg.consumer_secret,
+                        token: cfg.token,
+                        token_secret: cfg.token_secret
+                    }
+
+                    var blogName = cfg.blog;
+                    var urlTpl = _.template('http://api.tumblr.com/v2/blog/<%=blog%>/post/edit'),
+                        url = urlTpl({blog: blogName});
+
+                    var params = {
+                        id : postId
+                    }
+
+                    var rs = Async.runSync(function (done) {
+                        var r = request.post({
+                            url: url,
+                            headers: {
+                                'User-Agent': 'tumblr.js/0.0.5'
+                            }
+                        }, function (err, response, body) {
+                            try {
+                                body = JSON.parse(body);
+                            } catch (e) {
+                                body = {error: 'Malformed Response: ' + body};
+                            }
+                            requestCallback(function (err, data) {
+                                if (err){
+                                    console.log(err);
+                                    done(err, null)
+                                };
+                                if (data)done(null, data);
+                            })(err, response, body);
+                        })
+
+                        // Sign it with the non-data parameters
+                        r.form(params);
+                        r.oauth(oauth);
+
+                        delete r.headers['content-type'];
+                        delete r.body;
+
+                        var form = r.form();
+                        for (var key in params) {
+                            form.append(key, params[key]);
+                        }
+                        if (images) {
+                            if (Array.isArray(images)) {
+                                for (var i = 0; i < images.length; i++) {
+                                    form.append('data[' + i.toString() + ']', fs.createReadStream(images[i]));
+                                }
+                            } else {
+                                form.append('data', fs.createReadStream(images));
+                            }
+                        }
+
+                        var headers = form.getHeaders();
+                        for (key in headers) {
+                            r.headers[key] = headers[key];
+                        }
+
+                    });
+                    if (rs.error) {
+                        console.log(rs.error);
+                    }
+                    return rs.result;
+                }
+            } catch (ex) {
                 console.log(ex);
             }
         }
     })
+
+    function requestCallback(callback) {
+        if (!callback) return undefined;
+        return function (err, response, body) {
+            if (err) return callback(err);
+            if (response.statusCode >= 400) {
+                var errString = body.meta ? body.meta.msg : body.error;
+                return callback(new Error('API error: ' + response.statusCode + ' ' + errString));
+            }
+            if (body && body.response) {
+                return callback(null, body.response);
+            } else {
+                return callback(new Error('API error (malformed API response): ' + body));
+            }
+        };
+    }
 }

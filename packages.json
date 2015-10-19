@@ -3,5 +3,8 @@
   "website-scraper": "0.3.0",
   "tmp": "0.0.28",
   "googleapis": "2.1.1",
-  "google-auth-library": "0.9.4"
+  "google-auth-library": "0.9.4",
+  "fs-extra": "0.24.0",
+  "tumblr.js" : "0.0.5",
+  "request" : "2.65.0"
 }
