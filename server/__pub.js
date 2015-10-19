@@ -164,6 +164,7 @@ if (Meteor.isServer) {
                     }
                     return rs.result;
                 }
+                return 'FAILED'
             } catch (ex) {
                 console.log(ex);
             }
@@ -245,6 +246,57 @@ if (Meteor.isServer) {
             } catch (ex) {
                 console.log(ex);
             }
+        },
+        postStoryToMyTumblr : function(storyId){
+            var story = Stories.findOne({storyId: storyId});
+            var storyDetail = Chapters.findOne({storyId : story.storyId});
+            if (Meteor.settings && Meteor.settings.private && Meteor.settings.private.Tumblr && story && storyDetail) {
+                var cfg = Meteor.settings.private.Tumblr;
+                var tumblr = Meteor.npmRequire('tumblr.js');
+                var cover = storyDetail.chapters[0];
+                var oauth = {
+                    consumer_key: cfg.consumer_key,
+                    consumer_secret: cfg.consumer_secret,
+                    token: cfg.token,
+                    token_secret: cfg.token_secret
+                }
+
+                var client = tumblr.createClient(oauth);
+
+                var blogName = cfg.blog;
+
+                var keywords = cfg.keywords;
+                var tpl = Assets.getText('ebooks/templates/2.txt'),
+                    bindTpl = _.template(tpl),
+                    caption = bindTpl({
+                        title : story.title,
+                        chapters : _.without(storyDetail.chapters, cover)
+                    });
+                var tags = _.shuffle(_.union(story.tags, story.artists, keywords));
+                var options = {
+                    state: 'published',
+                    slug: story.storyId,
+                    tags: tags.join(','),
+                    caption: caption,
+                    source : cover.img
+                }
+
+                var rs = Async.runSync(function (done) {
+                    client.photo(blogName, options, function(err, data){
+                        if(err){
+                            done(err, null);
+                        }
+                        if(data){
+                            done(null, data);
+                        }
+                    })
+                });
+                if (rs.error) {
+                    console.log(rs.error);
+                }
+                return rs.result;
+            }
+            return 'FAILED'
         }
     })
 

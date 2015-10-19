@@ -1,0 +1,1 @@
+<strong><%=title%><strong/><br/><%_.each(chapters, function(chapter){%> <img src="<%=chapter.img%>" alt="<%=chapter.no%>" class="chapter"/><%});%>
