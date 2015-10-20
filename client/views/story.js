@@ -18,4 +18,4 @@ Template.story_read.viewmodel({
     autorun: function (c) {
         if (this.story())document.title = this.story().title;
     }
-}, 'chapters', 'preloadChapters')
+}, 'chapters')

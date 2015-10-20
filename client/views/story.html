@@ -12,14 +12,11 @@
     </div>
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
-            {{#each preloadChapters}}
-                <img data-aload="{{img}}" alt="{{no}}" style="display: none" class="img-responsive"/>
+            {{#each chapters}}
+                <div class="chapter" data-loading="Loading..." data-image="{{img}}"></div>
             {{/each}}
         </div>
     </div>
-    {{#each chapters}}
-        <div data-image="{{img}}"></div>
-    {{/each}}
 {{else}}
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
